@@ -1,4 +1,5 @@
 export type ApiResponse<T> =
     | { success: true; data: T }
     | { success: false; message: string };
-export default ApiResponse;
+
+export type CreateUserBody = { name: string; email: string; password: string };

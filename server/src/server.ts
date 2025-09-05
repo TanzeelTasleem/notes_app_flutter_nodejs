@@ -1,6 +1,6 @@
-import app from "./app.js";
-import config from "./config/config.js";
-import connectDB from "./config/db.js";
+import app from "./app";
+import config from "./config/config";
+import connectDB from "./config/db";
 
 // Connect to the database
 connectDB();

@@ -22,15 +22,15 @@ const connectDB = async () => {
 
 // Listen for disconnection events.
 mongoose.connection.on('disconnected', () => {
-  console.warn('Mongoose disconnected from MongoDB. Reconnecting...');
-  connectDB(); // Attempt to reconnect
+    console.warn('Mongoose disconnected from MongoDB. Reconnecting...');
+    connectDB(); // Attempt to reconnect
 });
 
 // Handle graceful shutdown.
 process.on('SIGINT', async () => {
-  await mongoose.connection.close();
-  console.log('Mongoose connection disconnected through app termination.');
-  process.exit(0);
+    await mongoose.connection.close();
+    console.log('Mongoose connection disconnected through app termination.');
+    process.exit(0);
 });
 
 

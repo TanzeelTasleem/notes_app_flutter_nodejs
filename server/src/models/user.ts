@@ -17,11 +17,11 @@ const usersSchema = new mongoose.Schema({
 },
     {
         timestamps: true  // ⏰ Mongoose adds createdAt & updatedAt automatically
-});
+    });
 
 const Users = mongoose.model('users', usersSchema);
 
-type User = InferSchemaType<typeof usersSchema>;
+type User = InferSchemaType<typeof usersSchema> & { _id: mongoose.Types.ObjectId };
 
 export default Users;
 
