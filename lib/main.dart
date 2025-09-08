@@ -1,14 +1,39 @@
 import 'package:flutter/material.dart';
-import 'package:notes_app/login_page.dart';
+import 'package:notes_app/screens/home_page.dart';
+import 'package:notes_app/providers/auth_provider.dart';
+import 'package:notes_app/screens/signup_page.dart';
+import 'package:provider/provider.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => AuthProvider(isLoading: false),
+      child: const MyApp(),
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   // This widget is the root of your application.
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      authProvider.loadUserFromStorage();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -31,8 +56,23 @@ class MyApp extends StatelessWidget {
         // This works for code too, not just values: Most code changes can be
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
       ),
-      home: LoginPage(),
+      home: Consumer<AuthProvider>(
+        builder: (context, authProvider, child) {
+          // Show a loading indicator during the initial load phase
+          if (authProvider.isInitialLoading) {
+            return Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(), // Initial load screen
+              ),
+            );
+          }
+
+          // Once initial loading is done, show either HomePage or SignupPage
+          return authProvider.isAuthenticated ? HomePage() : SignupPage();
+        },
+      ),
     );
   }
 }

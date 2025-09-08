@@ -1,6 +1,8 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:notes_app/providers/auth_provider.dart';
+import 'package:notes_app/screens/home_page.dart';
+import 'package:notes_app/screens/signup_page.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -10,15 +12,31 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-
-  var _formKey = GlobalKey<FormState>();
-
+  final _formKey = GlobalKey<FormState>();
   var isPasswordVisible = false;
+
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+
+    void _login() async {
+      final loginRes = await authProvider.login(emailController.text, passwordController.text);
+      if (loginRes.success && authProvider.isAuthenticated) {
+        // Navigate to home page or another page after successful login
+        Navigator.of(
+          context,
+        ).pushReplacement(MaterialPageRoute(builder: (context) => HomePage()));
+      } else {
+        final msg = loginRes.message ?? 'Login failed. Please try again.';
+        // Show error message if login failed
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(msg)),
+        );
+      }
+    }
+
     return Scaffold(
       body: Center(
         child: Column(
@@ -92,34 +110,47 @@ class _LoginPageState extends State<LoginPage> {
                               isPasswordVisible = !isPasswordVisible;
                             });
                           },
-                          icon: !isPasswordVisible ? const Icon(Icons.visibility) : const Icon(Icons.visibility_off),
+                          icon: !isPasswordVisible
+                              ? const Icon(Icons.visibility)
+                              : const Icon(Icons.visibility_off),
                         ),
                       ),
                     ),
                     Container(
                       alignment: Alignment.centerRight,
-                      child: const Text(
-                        'Don\'t have an account? Sign up',
-                        style: TextStyle(color: Colors.blue),
+                      child: GestureDetector(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SignupPage(),
+                          ),
+                        ),
+                        child: const Text(
+                          'Don\'t have an account? Sign up',
+                          style: TextStyle(color: Colors.blue),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 5),
                     ElevatedButton(
-                      onPressed: () {
-                        // Handle login action
-                        if (_formKey.currentState!.validate()) {
-                          // Process data.
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Processing Data ...'),
-                            ),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Invalid Data')),
-                          );
-                        }
-                      },
+                      onPressed: authProvider.isLoading
+                          ? null
+                          : () {
+                              // Handle login action
+                              if (_formKey.currentState!.validate()) {
+                                // Process data.
+                                // ScaffoldMessenger.of(context).showSnackBar(
+                                //   const SnackBar(
+                                //     content: Text('Processing Data ...'),
+                                //   ),
+                                // );
+                                _login();
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Invalid Data')),
+                                );
+                              }
+                            },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.deepPurple,
                         minimumSize: const Size.fromHeight(50),
@@ -127,9 +158,9 @@ class _LoginPageState extends State<LoginPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
-                        'Sign In',
-                        style: TextStyle(
+                      child: Text(
+                        authProvider.isLoading ? 'Signing In...' : 'Sign In',
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
