@@ -12,7 +12,6 @@ app.use(express.json());
 app.use('/api/notes', notesRoutes);
 app.use('/api/auth', authRoutes);
 
-
 // Global error handler (should be after routes)
 app.use(errorHandler);
 

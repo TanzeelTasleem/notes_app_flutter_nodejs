@@ -6,6 +6,6 @@ import connectDB from "./config/db";
 connectDB();
 
 // Start the server
-app.listen(config.port, () => {
+app.listen(config.port, '0.0.0.0', () => {
   console.log(`Server running on port ${config.port}`);
 });
